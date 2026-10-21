@@ -1,0 +1,5 @@
+declare module '@hookform/resolvers/zod'
+declare module 'jspdf-autotable'
+declare module 'html2canvas'
+declare module '@tanstack/react-query'
+declare module 'recharts'

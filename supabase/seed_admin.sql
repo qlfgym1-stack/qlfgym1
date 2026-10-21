@@ -1,0 +1,34 @@
+-- Seed admin user
+-- Run this in Supabase SQL Editor after creating the user in Auth
+-- 1. First create the user via Supabase Dashboard > Authentication > Add User
+--    Email: MoussaMohamedelmabrouk@gmail.com
+--    Password: (choose a strong password)
+-- 2. Then run this script
+
+DO $$
+DECLARE
+  v_user_id UUID;
+  v_org_id UUID;
+BEGIN
+  -- Get the user ID from auth.users
+  SELECT id INTO v_user_id
+  FROM auth.users
+  WHERE email = 'MoussaMohamedelmabrouk@gmail.com';
+
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'User not found in auth.users. Create the user first via Supabase Dashboard > Authentication > Add User';
+  END IF;
+
+  -- Get or create the default organization
+  INSERT INTO organizations (name, slug)
+  VALUES ('QLF GYM', 'qlf-gym')
+  ON CONFLICT (slug) DO UPDATE SET name = 'QLF GYM'
+  RETURNING id INTO v_org_id;
+
+  -- Assign admin role
+  INSERT INTO user_roles (user_id, organization_id, role)
+  VALUES (v_user_id, v_org_id, 'admin')
+  ON CONFLICT (user_id, organization_id) DO UPDATE SET role = 'admin';
+
+  RAISE NOTICE 'Admin user MoussaMohamedelmabrouk@gmail.com assigned admin for organization QLF GYM';
+END $$;
